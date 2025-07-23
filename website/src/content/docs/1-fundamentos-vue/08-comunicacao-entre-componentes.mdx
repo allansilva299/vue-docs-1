@@ -1,0 +1,167 @@
+---
+title: Comunicação - Props e Emits
+description: "Aprenda o fluxo de dados unidirecional do Vue e como usar props para passar dados de pai para filho e emits para comunicar do filho para o pai."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Até agora, trabalhamos com componentes isolados. Mas o poder do Vue vem de compor pequenos componentes para criar interfaces complexas. Para isso, eles precisam conversar entre si.
+
+No Vue, a comunicação segue um padrão estrito e previsível: o **fluxo de dados unidirecional**.
+
+-   **Dados fluem de cima para baixo:** Do componente Pai para o componente Filho, através de **Props**.
+-   **Eventos fluem de baixo para cima:** Do componente Filho para o componente Pai, através de **Emits**.
+
+<Aside>
+Um componente Filho **nunca** deve modificar diretamente os dados de um Pai. Ele deve "pedir permissão" emitindo um evento, e o Pai decide o que fazer. Isso mantém a lógica organizada e fácil de rastrear.
+</Aside>
+
+Vamos criar um exemplo prático. Teremos um componente `App.vue` (Pai) que exibe uma lista de tarefas, e um componente `TarefaItem.vue` (Filho) para exibir cada tarefa individualmente.
+
+### 1. Passando Dados para Baixo com `Props`
+
+Props (abreviação de "propriedades") são atributos customizados que você pode registrar em um componente. Elas permitem que um componente Pai passe dados para um componente Filho.
+
+**Passo 1: Crie o componente Filho `TarefaItem.vue`**
+
+Crie um novo arquivo em `src/components/TarefaItem.vue`.
+
+```vue
+// src/components/TarefaItem.vue
+
+<script setup>
+// 1. Use a macro 'defineProps' para declarar as props que este componente espera receber.
+const props = defineProps({
+  // É uma boa prática definir o tipo da prop.
+  tarefa: Object 
+});
+</script>
+
+<template>
+  <li>
+    <!-- 2. Use a prop como qualquer outra variável no template. -->
+    {{ props.tarefa.texto }}
+    <span v-if="props.tarefa.completa"> (Concluída)</span>
+  </li>
+</template>
+
+<style scoped>
+li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+</style>
+```
+
+**Passo 2: Use o Filho no componente Pai `App.vue`**
+
+```vue
+// src/App.vue
+
+<script setup>
+import { ref } from 'vue';
+// 1. Importe o componente filho.
+import TarefaItem from './components/TarefaItem.vue';
+
+const tarefas = ref([
+  { id: 1, texto: 'Aprender Props', completa: true },
+  { id: 2, texto: 'Aprender Emits', completa: false }
+]);
+</script>
+
+<template>
+  <h1>Lista de Tarefas</h1>
+  <ul>
+    <!-- 2. Use o componente filho dentro de um v-for. -->
+    <!-- 3. Use v-bind (ou o atalho :) para passar a 'tarefa' do loop para a prop 'tarefa' do filho. -->
+    <TarefaItem 
+      v-for="tarefa in tarefas" 
+      :key="tarefa.id" 
+      :tarefa="tarefa" 
+    />
+  </ul>
+</template>
+```
+Pronto! O `App.vue` está passando cada objeto `tarefa` para o componente `TarefaItem.vue`, que sabe como renderizá-lo.
+
+### 2. Enviando Eventos para Cima com `Emits`
+
+E se o componente Filho precisar comunicar algo de volta ao Pai? Por exemplo, um botão "Deletar" dentro de `TarefaItem.vue`. O Filho não pode deletar o item do array `tarefas` do Pai. Ele precisa **emitir um evento** para que o Pai o faça.
+
+**Passo 1: Modifique o Filho para emitir o evento**
+
+```vue
+// src/components/TarefaItem.vue
+
+<script setup>
+defineProps({
+  tarefa: Object
+});
+
+// 1. Use a macro 'defineEmits' para declarar os eventos que este componente pode emitir.
+const emit = defineEmits(['deletar-tarefa']);
+
+function notificarDelecao() {
+  // 2. Chame emit() com o nome do evento e, opcionalmente, um valor (payload).
+  // Aqui, estamos passando o ID da tarefa para que o pai saiba qual deletar.
+  emit('deletar-tarefa', props.tarefa.id);
+}
+</script>
+
+<template>
+  <li>
+    {{ props.tarefa.texto }}
+    <!-- 3. Adicione um botão que chama a função para emitir o evento. -->
+    <button @click="notificarDelecao">X</button>
+  </li>
+</template>
+
+<style scoped>
+/* ... */
+button {
+  margin-left: 10px;
+  color: red;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+</style>
+```
+
+**Passo 2: Modifique o Pai para escutar o evento**
+
+```vue
+// src/App.vue
+
+<script setup>
+import { ref } from 'vue';
+import TarefaItem from './components/TarefaItem.vue';
+
+const tarefas = ref([
+  { id: 1, texto: 'Aprender Props', completa: true },
+  { id: 2, texto: 'Aprender Emits', completa: false }
+]);
+
+// 1. Crie uma função no pai que fará o trabalho.
+// Ela recebe o valor (payload) enviado pelo filho.
+function deletarTarefa(idDaTarefa) {
+  tarefas.value = tarefas.value.filter(t => t.id !== idDaTarefa);
+}
+</script>
+
+<template>
+  <h1>Lista de Tarefas</h1>
+  <ul>
+    <!-- 2. Use v-on (ou o atalho @) para escutar o evento customizado 'deletar-tarefa'. -->
+    <!-- Quando o evento for emitido, chame a função 'deletarTarefa'. -->
+    <TarefaItem 
+      v-for="tarefa in tarefas" 
+      :key="tarefa.id" 
+      :tarefa="tarefa"
+      @deletar-tarefa="deletarTarefa"
+    />
+  </ul>
+</template>
+```
+
+Agora, ao clicar no "X" em um item da lista, o `TarefaItem` emite um evento com o ID, o `App.vue` escuta esse evento, chama sua função `deletarTarefa` com esse ID e filtra o array. O fluxo de dados é limpo e fácil de seguir!
+

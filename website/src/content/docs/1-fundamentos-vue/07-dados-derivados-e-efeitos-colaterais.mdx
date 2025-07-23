@@ -1,0 +1,125 @@
+---
+title: Computed e Watch
+description: "Aprenda a criar dados derivados com computed properties e a reagir a mudanças de estado com watchers."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Às vezes, precisamos de um dado que depende de outro. Por exemplo, um nome completo que é a junção do primeiro nome e do sobrenome. Outras vezes, precisamos executar uma ação sempre que um dado específico muda, como buscar informações de uma API.
+
+Para esses cenários, o Vue nos oferece duas ferramentas poderosas: `computed` e `watch`.
+
+### Propriedades Computadas (`computed`)
+
+Pense em uma propriedade computada como um "dado derivado". Ela calcula seu valor com base em outras variáveis reativas e, o mais importante, **ela é cacheada**. Isso significa que a função que a calcula só será executada novamente se uma de suas dependências reativas mudar.
+
+Isso é muito mais eficiente do que chamar um método no template.
+
+**Exemplo: Sem `computed`**
+
+Imagine uma lista de tarefas. Queremos mostrar apenas as tarefas que ainda não foram concluídas. Poderíamos fazer isso com um método.
+
+```vue
+<script setup>
+import { reactive } from 'vue';
+
+const tarefas = reactive([
+  { id: 1, texto: 'Aprender Vue', completa: false },
+  { id: 2, texto: 'Construir um projeto', completa: true },
+  { id: 3, texto: 'Dominar o mundo', completa: false }
+]);
+
+// Um método comum
+function getTarefasIncompletas() {
+  console.log('O método foi chamado!');
+  return tarefas.filter(t => !t.completa);
+}
+</script>
+
+<template>
+  <!-- Este método será chamado toda vez que o componente re-renderizar, mesmo que 'tarefas' não mude! -->
+  <ul>
+    <li v-for="tarefa in getTarefasIncompletas()" :key="tarefa.id">
+      {{ tarefa.texto }}
+    </li>
+  </ul>
+</template>
+```
+
+**Exemplo: Com `computed` (a forma correta)**
+
+Agora, vamos refatorar usando `computed`.
+
+```vue
+<script setup>
+// 1. Importe 'computed' e 'reactive'
+import { reactive, computed } from 'vue';
+
+const tarefas = reactive([
+  { id: 1, texto: 'Aprender Vue', completa: false },
+  { id: 2, texto: 'Construir um projeto', completa: true },
+  { id: 3, texto: 'Dominar o mundo', completa: false }
+]);
+
+// 2. Crie uma propriedade computada
+const tarefasIncompletas = computed(() => {
+  // Esta função só será executada quando o array 'tarefas' mudar.
+  console.log('A computada foi calculada!');
+  return tarefas.filter(t => !t.completa);
+});
+</script>
+
+<template>
+  <!-- 3. Use a computada como se fosse um 'ref' normal (sem .value no template) -->
+  <ul>
+    <li v-for="tarefa in tarefasIncompletas" :key="tarefa.id">
+      {{ tarefa.texto }}
+    </li>
+  </ul>
+</template>
+```
+
+<Aside type="note" title="A Mágica do Cache">
+A propriedade computada `tarefasIncompletas` será calculada uma vez. Se algo mais na página causar uma re-renderização, o Vue não recalculará a lista. Ele usará o resultado em cache. Ele só recalculará se você adicionar, remover ou modificar um item no array `tarefas`. Isso é performance!
+</Aside>
+
+### Observadores (`watch`)
+
+Enquanto as propriedades computadas são ótimas para criar dados derivados, os **observadores (`watch`)** são para executar "efeitos colaterais" em resposta a uma mudança de estado.
+
+> **Efeito colateral** é qualquer código que afeta algo fora do próprio componente, como uma chamada de API, manipulação manual do DOM, ou salvar dados no `localStorage`.
+
+A função `watch` observa uma fonte de dados reativa (`ref` ou `reactive`) e executa uma função de callback sempre que essa fonte muda.
+
+```vue
+<script setup>
+import { ref, watch } from 'vue';
+
+const idDaPergunta = ref(1);
+const pergunta = ref(null);
+
+// O watch recebe duas coisas:
+// 1. A fonte de dados a ser observada (idDaPergunta)
+// 2. O callback a ser executado quando a fonte mudar
+watch(idDaPergunta, async (novoId, idAntigo) => {
+  console.log(`O ID mudou de ${idAntigo} para ${novoId}`);
+  // Exemplo de efeito colateral: buscar dados
+  const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${novoId}`);
+  pergunta.value = await response.json();
+});
+</script>
+
+<template>
+  <p>ID da Pergunta: {{ idDaPergunta }}</p>
+  <button @click="idDaPergunta++">Próxima Pergunta</button>
+  <p>Dados da Pergunta: {{ pergunta }}</p>
+</template>
+```
+
+Ao clicar no botão, o `idDaPergunta` muda. O `watch` detecta essa mudança, executa o callback, faz uma nova chamada de API e atualiza a variável `pergunta`.
+
+<Aside type="tip" title="Computed vs. Watch: A Regra de Ouro">
+- **Use `computed`** quando você precisar criar um novo dado a partir de dados existentes. Pergunta-chave: "Eu preciso *calcular e exibir* um valor com base em outro?"
+- **Use `watch`** quando você precisar executar uma ação em resposta a uma mudança. Pergunta-chave: "Quando este dado mudar, eu preciso *fazer alguma coisa*?"
+</Aside>
+
+Com estas ferramentas, você pode criar lógicas complexas e reativas de forma declarativa, limpa e eficiente. O próximo passo é aprender a fazer componentes conversarem entre si.

@@ -1,0 +1,114 @@
+---
+title: A Anatomia de um Componente
+---
+import { Aside } from '@astrojs/starlight/components';
+
+No tutorial anterior, você criou seu primeiro projeto Vue. Agora, vamos abrir o capô e entender como ele funciona. A peça central da organização de código no Vue são os **Single File Components** (Componentes de Arquivo Único), ou **SFCs**.
+
+A ideia é brilhante em sua simplicidade: em vez de separar seu HTML, CSS e JavaScript em arquivos diferentes, você os agrupa em um único arquivo `.vue` que representa um componente.
+
+Vamos explorar o projeto que criamos. Abra a pasta `aprendendo-vue` no seu editor de código (como o VS Code) e observe a estrutura dentro de `src/`:
+
+```text
+src/
+├── assets/
+│   ├── base.css
+│   └── logo.svg
+├── components/
+│   ├── HelloWorld.vue
+│   ├── TheWelcome.vue
+│   └── ...
+├── App.vue      # O componente principal da nossa aplicação
+└── main.js      # O ponto de entrada da aplicação
+```
+
+O arquivo `App.vue` é o componente raiz que está sendo renderizado na página. Vamos analisar sua estrutura, que é o padrão para todos os componentes Vue.
+
+### Os 3 Blocos de um Componente Vue
+
+Um SFC é dividido em três blocos principais:
+
+#### 1. O Bloco `<template>`: A Estrutura
+
+O bloco `<template>` contém toda a estrutura HTML do seu componente. É aqui que você define como seu componente será renderizado na tela. Ele é muito parecido com um arquivo HTML comum, mas com superpoderes que aprenderemos em breve, como exibir dados do JavaScript.
+
+```html
+<template>
+  <header>
+    <img alt="Vue logo" class="logo" src="./assets/logo.svg" />
+    <h1>Bem-vindo ao Vue!</h1>
+  </header>
+</template>
+```
+
+---
+
+#### 2. O Bloco `<script setup>`: A Lógica
+
+Este é o cérebro do seu componente. O bloco `<script setup>` é onde toda a sua lógica JavaScript reside. É aqui que você vai:
+- Importar outros componentes ou bibliotecas.
+- Definir os dados que seu componente usará (o "estado").
+- Criar funções para lidar com eventos (como cliques de botão).
+
+Usar o atributo `setup` é a forma **moderna e recomendada** de escrever a lógica de componentes no Vue 3. Ele torna o código mais conciso e eficiente.
+
+```javascript
+<script setup>
+// Aqui podemos importar outros componentes, se necessário
+import HelloWorld from './components/HelloWorld.vue';
+
+// E aqui podemos definir variáveis e funções
+const nomeDoUsuario = 'Visitante';
+</script>
+```
+
+---
+
+#### 3. O Bloco `<style scoped>`: A Aparência
+
+O bloco `<style>` contém todo o CSS para o seu componente. A parte mais importante aqui é o atributo `scoped`.
+
+<Aside type="note">
+Quando você adiciona `scoped` à tag `<style>`, o Vue garante que os estilos que você escrever aqui **só se aplicarão a este componente específico**. Isso evita que o seu CSS "vaze" e afete acidentalmente outras partes da sua aplicação. É uma boa ferramenta para criar componentes verdadeiramente encapsulados.
+</Aside>
+
+```css
+<style scoped>
+header {
+  line-height: 1.5;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 2rem;
+}
+</style>
+```
+
+### Juntando Tudo
+
+Quando colocados juntos no mesmo arquivo `.vue`, eles formam um componente completo, organizado e autossuficiente:
+
+```vue
+<!-- Exemplo de um componente completo (versão simplificada) -->
+<script setup>
+// Lógica JavaScript
+const message = 'Meu primeiro componente Vue!';
+</script>
+
+<template>
+  <!-- Estrutura HTML -->
+  <div class="container">
+    <h1>{{ message }}</h1>
+  </div>
+</template>
+
+<style scoped>
+/* Estilos específicos */
+.container {
+  text-align: center;
+  margin-top: 60px;
+  color: #2c3e50;
+}
+</style>
+```

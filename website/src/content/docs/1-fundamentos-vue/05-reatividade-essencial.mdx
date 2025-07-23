@@ -1,0 +1,101 @@
+---
+title: Reatividade Essencial - ref e reactive
+description: "Aprenda como criar estado reativo no Vue 3 com as funções ref e reactive para sincronizar seus dados com a UI."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+No final do último tutorial, deixamos um desafio: criar um contador que, ao ser clicado, incrementasse um número na tela. Você provavelmente notou que, usando uma variável JavaScript padrão (`let contador = 0`), o valor na tela não mudava.
+
+Isso acontece porque o Vue não tem como "saber" que ele precisa atualizar a interface quando uma variável comum muda. Para resolver isso, precisamos criar um **estado reativo**.
+
+> **Estado reativo** é um dado que, quando modificado, informa ao Vue para que ele re-renderize a interface e mostre o novo valor.
+
+Na Composition API, temos duas ferramentas principais para criar estado reativo: `ref` e `reactive`.
+
+### 1. `ref`: Tornando qualquer valor reativo
+
+A função `ref` pega um valor interno (seja um número, uma string, um booleano ou até um objeto) e retorna um objeto reativo e mutável. Este objeto possui uma única propriedade: `.value`.
+
+Vamos resolver nosso problema do contador usando `ref`.
+
+**Em `App.vue`:**
+
+```vue
+<script setup>
+// 1. Importe 'ref' de dentro do vue
+import { ref } from 'vue';
+
+// 2. Crie uma variável reativa usando ref()
+const contador = ref(0);
+
+// 3. Crie uma função para modificar o valor
+function incrementar() {
+  // 4. Para acessar ou modificar o valor de um ref, use a propriedade .value
+  contador.value++;
+  console.log('O valor do contador é:', contador.value);
+}
+</script>
+
+<template>
+  <!-- 5. No template, o Vue "desembrulha" o ref automaticamente. Você NÃO precisa usar .value aqui. -->
+  <h1>Contador: {{ contador }}</h1>
+  <button @click="incrementar">Incrementar</button>
+</template>
+```
+
+Agora, ao clicar no botão, você verá o número na tela aumentar!
+
+<Aside type="caution" title="Por que .value?">
+Você pode se perguntar por que precisamos do `.value` no `<script>`. Isso é devido a como o JavaScript funciona. O `ref()` "embrulha" seu valor em um objeto para que o Vue possa detectar quando a propriedade `.value` é alterada. Felizmente, no `<template>`, o Vue é inteligente o suficiente para fazer esse "desembrulho" para nós, tornando o código mais limpo.
+</Aside>
+
+### 2. `reactive`: Apenas para Objetos
+
+A função `reactive` funciona de forma um pouco diferente: ela transforma um objeto JavaScript em um objeto reativo (um "Proxy"). Ela **não** funciona com valores primitivos como números ou strings.
+
+A principal diferença é que você não precisa usar `.value`. Você modifica as propriedades do objeto diretamente.
+
+**Exemplo com `reactive`:**
+
+```vue
+<script setup>
+// 1. Importe 'reactive'
+import { reactive } from 'vue';
+
+// 2. Crie um objeto reativo
+const formulario = reactive({
+  nome: '',
+  email: ''
+});
+
+function limparFormulario() {
+  // 3. Modifique as propriedades diretamente
+  formulario.nome = '';
+  formulario.email = '';
+}
+</script>
+
+<template>
+  <div>
+    <input type="text" v-model="formulario.nome" placeholder="Nome">
+    <input type="email" v-model="formulario.email" placeholder="Email">
+    <p>Dados: {{ formulario.nome }} - {{ formulario.email }}</p>
+    <button @click="limparFormulario">Limpar</button>
+  </div>
+</template>
+```
+*(A diretiva `v-model` que usamos no input é um atalho para vincular o valor de um campo de formulário a uma variável reativa. Falaremos mais sobre ela depois!)*
+
+### `ref` vs. `reactive`: Quando Usar Qual?
+
+Esta é uma dúvida comum. Aqui está uma regra simples para começar:
+
+-   **Use `ref` para valores primitivos:** `String`, `Number`, `Boolean`.
+-   **Use `ref` quando você precisar reatribuir uma variável inteira:** `meuArray.value = [1, 2, 3]`
+-   **Use `reactive` para objetos ou arrays** que você não pretende reatribuir, mas sim modificar suas propriedades ou elementos internos.
+
+<Aside type="tip" title="Dica de Ouro">
+Quando estiver em dúvida, **comece com `ref`**. Ele funciona para todos os tipos de dados e é mais flexível, tornando-se uma escolha segura e consistente, especialmente para iniciantes.
+</Aside>
+
+Com `ref` e `reactive` em seu arsenal, você agora detém o poder da reatividade do Vue. No próximo tutorial, usaremos essa habilidade para renderizar elementos condicionalmente e criar listas dinâmicas.

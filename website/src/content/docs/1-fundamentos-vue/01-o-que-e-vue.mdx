@@ -1,0 +1,64 @@
+---
+title: O que é Vue.js? Uma Visão Geral
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Olá e seja muito bem-vindo(a) ao início da sua jornada no ecossistema Vue! Se você já tem uma base de HTML, CSS e JavaScript, está no lugar perfeito. Você verá como o Vue pode pegar o conhecimento que você já possui e melhorá-lo, permitindo criar interfaces de usuário (UIs) interativas e complexas de uma forma simples e organizada.
+
+<Aside>
+Pense no Vue como uma facilitação de escrita do seu HTML.
+</Aside>
+
+O Vue.js é definido como um **framework progressivo**. Mas o que isso significa? Significa que ele não é uma solução "tudo ou nada". Você pode:
+
+1.  **Usar o Vue para controlar apenas uma pequena parte de uma página existente.**
+2.  **Usá-lo para construir uma aplicação completa de página única (SPA - Single Page Application).**
+
+Essa flexibilidade é um dos seus maiores benefícios. Mas para realmente entender o Vue, precisamos focar em seus dois conceitos fundamentais.
+
+## Os Dois Pilares do Vue.js
+
+Tudo no Vue gira em torno de duas ideias que trabalham em conjunto.
+
+### 1. Arquitetura Baseada em Componentes
+
+Imagine construir uma interface complexa usando blocos de LEGO. Em vez de tentar esculpir a coisa toda de uma única peça gigante, você constrói peças menores e reutilizáveis e depois as junta para formar sua criação.
+
+Isso é exatamente o que são os **Componentes** no Vue.
+
+> Um **Componente** é um bloco de construção da sua interface. Ele encapsula seu próprio HTML (`<template>`), sua própria lógica JavaScript (`<script>`) e seu próprio CSS (`<style>`).
+
+Uma página web típica pode ser dividida assim:
+-   `Navbar` (Componente)
+-   `Sidebar` (Componente)
+-   `ArticleList` (Componente)
+    -   `ArticleItem` (Componente)
+    -   `ArticleItem` (Componente)
+-   `Footer` (Componente)
+
+Trabalhar com componentes torna seu código mais organizado, fácil de manter e, o mais importante, **reutilizável**.
+
+### 2. Reatividade: A Mágica do Vue
+
+Este é o conceito que faz os desenvolvedores se apaixonarem pelo Vue. A **Reatividade** é o sistema que mantém seus dados e sua interface em sincronia, automaticamente.
+
+<Aside type="note" title="Analogia da Planilha">
+  Pense em uma planilha (como o Excel ou Google Sheets).
+  - Na célula **A1**, você digita o valor `10`.
+  - Na célula **B1**, você digita a fórmula `=A1 * 2`. O resultado `20` aparece imediatamente.
+
+  Se você alterar **A1** para `50`, a célula **B1** atualiza **automaticamente** para `100`. Você não precisou mandar recalcular. Ela "reagiu" à mudança.
+</Aside>
+
+**É exatamente assim que a reatividade do Vue funciona.**
+
+-   No seu JavaScript, você define um dado: `const contador = 0;`.
+-   No seu HTML, você exibe esse dado: `<p>O valor é: {{ contador }}</p>`.
+-   Quando uma ação (como um clique de botão) altera o valor de `contador` para `1`, o Vue automaticamente atualiza o parágrafo na tela.
+
+Você foca na lógica dos seus dados, e o Vue cuida da sincronização com a tela.
+
+## Próximos Passos
+
+No próximo tutorial, vamos configurar nosso ambiente de desenvolvimento e criar nossa primeira aplicação Vue 3.
+

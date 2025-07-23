@@ -1,0 +1,158 @@
+---
+title: Composição Avançada com Slots
+description: "Domine os slots para criar componentes de layout altamente reutilizáveis, passando conteúdo HTML do pai para o filho."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Você já aprendeu a passar dados com `props`. Mas e se você quisesse passar um bloco de HTML, ou até mesmo outros componentes, de um pai para um filho? É para isso que servem os **slots**.
+
+Pense em `slots` como espaços reservados. Você cria um componente de "layout" ou "casca" (como um card, um modal, um painel) e deixa um ou mais "buracos" (slots) para o componente pai preencher com o conteúdo que ele quiser.
+
+### 1. O Slot Padrão (`default`)
+
+O slot mais simples é o slot padrão. Ele é um único espaço reservado em um componente filho.
+
+**Passo 1: Crie um componente `BaseCard.vue` com um slot.**
+
+Crie um novo arquivo em `src/components/BaseCard.vue`.
+
+```vue
+// src/components/BaseCard.vue
+
+<template>
+  <div class="card">
+    <!-- Este é o espaço reservado. O conteúdo do pai virá aqui. -->
+    <slot></slot>
+  </div>
+</template>
+
+<style scoped>
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+</style>
+```
+
+**Passo 2: Use o `BaseCard` no componente pai e passe conteúdo para ele.**
+
+Agora, no `App.vue`, podemos usar nosso `BaseCard` e colocar qualquer HTML dentro dele.
+
+```vue
+// src/App.vue
+
+<script setup>
+import BaseCard from './components/BaseCard.vue';
+</script>
+
+<template>
+  <h1>Usando Slots</h1>
+
+  <BaseCard>
+    <!-- Todo este conteúdo será injetado no <slot> do BaseCard -->
+    <h2>Título do Card</h2>
+    <p>Este é um parágrafo dentro do nosso componente de card reutilizável.</p>
+    <button>Clique aqui</button>
+  </BaseCard>
+
+  <BaseCard>
+    <!-- Podemos reutilizá-lo com um conteúdo totalmente diferente! -->
+    <img src="/logo.svg" alt="Vue Logo" width="50" />
+    <p>Outro card com uma imagem.</p>
+  </BaseCard>
+</template>
+```
+O `BaseCard` fornece a estrutura e o estilo (a "casca"), enquanto o `App.vue` fornece o conteúdo. Isso é composição de componentes no seu melhor!
+
+#### Conteúdo de Fallback
+
+Você pode fornecer um conteúdo padrão para um slot, que será exibido apenas se o componente pai não fornecer nenhum conteúdo.
+
+```vue
+// src/components/BaseCard.vue (modificado)
+<template>
+  <div class="card">
+    <slot>
+      <!-- Este é o conteúdo de fallback -->
+      <p>Nenhum conteúdo fornecido. Mostrando mensagem padrão.</p>
+    </slot>
+  </div>
+</template>
+```
+
+### 2. Slots Nomeados (`named slots`)
+
+E se o seu componente de layout precisar de múltiplos espaços para conteúdo? Por exemplo, um card com um cabeçalho, um corpo e um rodapé bem definidos. Para isso, usamos **slots nomeados**.
+
+**Passo 1: Modifique o `BaseCard.vue` para ter slots nomeados.**
+
+```vue
+// src/components/BaseCard.vue (modificado)
+
+<template>
+  <div class="card">
+    <header class="card-header">
+      <slot name="header"></slot>
+    </header>
+    <main class="card-body">
+      <!-- O slot sem nome é o slot 'default' -->
+      <slot></slot>
+    </main>
+    <footer class="card-footer">
+      <slot name="footer"></slot>
+    </footer>
+  </div>
+</template>
+
+<style scoped>
+/* ... (estilos do card) ... */
+.card-header { font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+.card-footer { border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px; font-size: 0.9em; }
+</style>
+```
+
+**Passo 2: Forneça conteúdo para os slots nomeados no pai.**
+
+Para passar conteúdo para um slot nomeado, usamos a diretiva `v-slot` em um elemento `<template>`.
+
+```vue
+// src/App.vue (modificado)
+
+<script setup>
+import BaseCard from './components/BaseCard.vue';
+</script>
+
+<template>
+  <BaseCard>
+    <!-- Para direcionar um slot, use v-slot:nome-do-slot -->
+    <template v-slot:header>
+      <h2>Card com Slots Nomeados</h2>
+    </template>
+
+    <!-- O conteúdo principal vai para o slot 'default' -->
+    <p>Este conteúdo vai para o corpo do card (o slot padrão).</p>
+    
+    <template v-slot:footer>
+      <button>Salvar</button>
+      <button>Cancelar</button>
+    </template>
+  </BaseCard>
+</template>
+```
+
+<Aside type="tip" title="Atalho para v-slot">
+Assim como `v-bind` (`:`) e `v-on` (`@`), `v-slot` também tem um atalho: o símbolo de hashtag (`#`).
+
+`v-slot:header` é o mesmo que `#header`.
+
+Na prática, você quase sempre usará o atalho `#`:
+```html
+<template #header>
+  <h2>Título do Card</h2>
+</template>
+```
+</Aside>
+

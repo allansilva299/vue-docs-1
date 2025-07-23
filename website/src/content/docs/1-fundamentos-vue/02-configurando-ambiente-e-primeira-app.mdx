@@ -1,0 +1,73 @@
+---
+title: Configurando o Ambiente e a Primeira Aplicação
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Com a teoria entendida, é hora da prática! Para começar a desenvolver com Vue, você precisa ter o [Node.js](https://nodejs.org/) instalado em sua máquina. O Vue e todo o seu ecossistema moderno utilizam o Node.js e seu gerenciador de pacotes, o **npm**, para instalar dependências, rodar o servidor de desenvolvimento e preparar a aplicação para produção.
+
+<Aside type="note">
+Se você não tem certeza se possui o Node.js, abra seu terminal e digite `node -v`. Se um número de versão aparecer (ex: `v20.11.0`), você está pronto. Caso contrário, [faça o download da versão LTS no site oficial](https://nodejs.org/en/download).
+</Aside>
+
+### Criando seu Primeiro Projeto Vue
+
+A equipe do Vue criou uma ferramenta de linha de comando (CLI) que torna a criação de novos projetos extremamente simples e rápida.
+
+1.  **Abra seu terminal** na pasta onde você costuma guardar seus projetos (ex: `Documents/Projetos`).
+
+2.  **Execute o seguinte comando:** Este comando irá baixar e executar o script de criação de projetos do Vue.
+
+    ```bash
+    npm create vue@latest
+    ```
+
+3.  **Responda às perguntas:** A ferramenta fará algumas perguntas para configurar seu projeto. Para este guia inicial, siga estas recomendações para mantermos o foco:
+
+    -   **Project name:** `aprendendo-vue` (ou o nome que preferir)
+    -   **Add TypeScript?** `No` *(Vamos focar em JavaScript puro por enquanto)*
+    -   **Add JSX Support?** `No`
+    -   **Add Vue Router for Single-Page Application development?** `No` *(Aprenderemos isso com o Nuxt mais tarde)*
+    -   **Add Pinia for state management?** `No` *(Teremos um capítulo dedicado a isso)*
+    -   **Add Vitest for Unit Testing?** `No`
+    -   **Add an End-to-End Testing Solution?** `No`
+    -   **Add ESLint for code quality?** `Yes` *(Altamente recomendado!)*
+    -   **Add Prettier for code formatting?** `Yes` *(Também recomendado para manter o código limpo)*
+
+    Após responder, a ferramenta criará uma nova pasta com o nome do seu projeto.
+
+### Rodando a Aplicação
+
+Seu projeto está criado! Agora, siga os comandos que a própria ferramenta sugere no final do processo:
+
+1.  **Navegue para a pasta do projeto:**
+    ```bash
+    cd aprendendo-vue
+    ```
+
+2.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+
+3.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    npm run dev
+    ```
+
+Seu terminal mostrará uma mensagem similar a esta, indicando que o servidor está rodando e qual o endereço para acessá-lo:
+
+```
+  VITE v5.2.8  ready in 384 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+```
+
+Abra seu navegador e acesse `http://localhost:5173`.
+
+<Aside type="tip" title="Sucesso!">
+Parabéns! Você acaba de criar e rodar sua primeira aplicação Vue 3. A página que você está vendo é a tela de boas-vindas padrão gerada pelo Vue.
+</Aside>
+
+

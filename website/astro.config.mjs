@@ -6,16 +6,15 @@ export default defineConfig({
 
 	// Added Configuration for 
 	// Deployment to GitHub Pages
-	site: 'https://AllanSilva29.github.io',
-	base: '/front-end-docs-1',
+	site: 'https://allansilva299.github.io',
+	base: '/vue-docs-1',
 
 	integrations: [
 		starlight({
-
 			plugins: [],
-			title: 'Guia Front-End',
+			title: 'Guia Front-End - Vue 3',
 			social: {
-				github: 'https://github.com/AllanSilva29/front-end-docs-1',
+				github: 'https://github.com/allansilva299/vue-docs-1',
 			},
 			customCss: [
 				'./src/styles/theme.css',
@@ -32,68 +31,8 @@ export default defineConfig({
 					autogenerate: { directory: 'reference' },
 				},
 				{
-					label: 'Links Úteis',
-					autogenerate: { directory: 'links'}
-				},
-				{
-					label: 'Fundamentos da Web',
-					items: [
-						{
-							label: 'Conceitos de Programação',
-							autogenerate: { directory: '1-fundamentos-web/1-conceitos-de-programacao' }, // Esse é um jeito mais tranquilo e autogerar rotas
-						},
-						{
-							label: 'HTML Essencial',
-							autogenerate: { directory: '1-fundamentos-web/2-html-essencial' },
-						},
-						{
-							label: 'CSS Moderno',
-							autogenerate: { directory: '1-fundamentos-web/3-css-moderno' },
-						},
-						{
-							label: 'JavaScript para React',
-							autogenerate: { directory: '1-fundamentos-web/4-javascript' },
-						},
-						{
-							label: 'TypeScript Essencial',
-							autogenerate: { directory: '1-fundamentos-web/5-typescript-essencial' },
-						},
-					],
-				},
-				{
-					label: 'Fundamentos do React',
-					items: [
-						{ label: 'O que é React?', link: '2-fundamentos-react/1-o-que-e-react/' },
-						{ label: 'JSX: A Sintaxe do React', link: '2-fundamentos-react/2-jsx-a-sintaxe-do-react/' },
-						{ label: 'Componentes: Os Blocos de Construção', link: '2-fundamentos-react/3-componentes-os-blocos-de-construcao/' },
-						{ label: 'Props vs. State', link: '2-fundamentos-react/4-props-vs-state/' },
-						{ label: 'O Virtual DOM', link: '2-fundamentos-react/5-o-virtual-dom/' },
-						{ label: 'A Importância das Keys', link: '2-fundamentos-react/6-a-importancia-das-keys/' },
-						{ label: 'Renderização Condicional', link: '2-fundamentos-react/7-renderizacao-condicional/' },
-					],
-				},
-				{
-					label: 'Hooks Essenciais',
-					items: [
-						{ label: 'Introdução aos Hooks', link: '3-hooks/1-introducao-aos-hooks/' },
-						{ label: 'useState: Adicionando Estado', link: '3-hooks/2-usestate/' },
-						{ label: 'useEffect: Efeitos Colaterais', link: '3-hooks/3-useeffect/' },
-						{ label: 'useContext: Dados Globais', link: '3-hooks/4-usecontext/' },
-						{ label: 'useMemo e useCallback: Otimização', link: '3-hooks/5-usememo-e-usecallback/' },
-						{ label: 'useRef: Acessando o DOM e Mais', link: '3-hooks/6-useref/' },
-						{ label: 'As Regras dos Hooks', link: '3-hooks/7-regras-dos-hooks/' },
-						{ label: 'Custom Hooks: Lógica Reutilizável', link: '3-hooks/8-custom-hooks/' },
-					]
-				},
-				{
-					label: 'Arquitetura de Projetos',
-					items: [
-					  { label: 'Estruturas de Pastas', link: '4-arquitetura/1-estruturas-de-pastas/' },
-					  { label: 'Roteamento em React', link: '4-arquitetura/2-roteamento-em-react/' },
-					  { label: 'Layouts e Páginas', link: '4-arquitetura/3-layouts-e-paginas/' },
-					  { label: 'Importações Absolutas', link: '4-arquitetura/4-importacoes-absolutas/' },
-					  { label: 'Comunicação entre Componentes', link: '4-arquitetura/5-comunicacao-entre-componentes/' },
-					]
+					label: 'Fundamentos do Vue 3',
+					autogenerate: { directory: '1-fundamentos-vue' },
 				},
 			],
 		}),

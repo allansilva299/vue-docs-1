@@ -1,0 +1,125 @@
+---
+title: Sintaxe de Templates
+description: "Aprenda a tornar seu HTML dinâmico com interpolação de texto, v-bind para atributos e v-on para eventos."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Agora que você entende a estrutura de um componente, é hora de fazer a mágica acontecer. Vamos conectar os dados e a lógica do seu bloco `<script setup>` com a estrutura HTML no seu `<template>`.
+
+O Vue estende o HTML com uma sintaxe de template que nos permite descrever declarativamente o HTML de saída com base no estado do JavaScript. Existem três conceitos básicos que você usará o tempo todo.
+
+### 1. Interpolação de Texto (Sintaxe "Mustache")
+
+A forma mais básica de vinculação de dados é a interpolação de texto, usando a sintaxe "Mustache" (chaves duplas): `{{ }}`. Isso permite que você exiba o valor de uma variável ou expressão JavaScript diretamente no seu HTML.
+
+Vamos modificar o componente `App.vue` do seu projeto para ver isso em ação.
+
+**Em `App.vue`:**
+
+```vue
+<script setup>
+const nome = 'Mundo';
+const detalhes = {
+  versao: 3,
+  framework: 'Vue'
+};
+</script>
+
+<template>
+  <h1>Olá, {{ nome }}!</h1>
+  <p>Estamos aprendendo {{ detalhes.framework }} na versão {{ detalhes.versao }}.</p>
+</template>
+
+<style scoped>
+</style>
+```
+
+Se você rodar sua aplicação (`npm run dev`), verá "Olá, Mundo!" e o parágrafo renderizados na tela. O Vue pegou os valores das constantes `nome` e `detalhes` do script e os inseriu no template.
+
+### 2. Vinculação de Atributos: `v-bind`
+
+A sintaxe mustache não funciona dentro de atributos HTML. Por exemplo, isto **não vai funcionar**: `<img src="{{ urlDaImagem }}">`.
+
+Para vincular um atributo HTML a um valor do seu script, usamos a diretiva `v-bind`.
+
+> Uma **diretiva** é um atributo especial prefixado com `v-` que diz ao Vue para fazer algo especial no elemento do DOM.
+
+```vue
+<script setup>
+const linkParaDocs = 'https://vuejs.org';
+const altDaImagem = 'Logotipo do Vue';
+const idDoElemento = 'titulo-principal';
+</script>
+
+<template>
+  <img v-bind:src="'/logo.svg'" v-bind:alt="altDaImagem">
+  <h1 v-bind:id="idDoElemento">
+    <a v-bind:href="linkParaDocs" target="_blank">Documentação Oficial</a>
+  </h1>
+</template>
+```
+
+#### Atalho para `v-bind`
+
+Como `v-bind` é usado com muita frequência, ele tem um atalho: os dois pontos (`:`).
+
+`v-bind:href` é exatamente o mesmo que `:href`.
+
+```vue
+<!-- Mesma coisa, mas mais limpo! -->
+<script setup>
+const linkParaDocs = 'https://vuejs.org';
+</script>
+
+<template>
+  <a :href="linkParaDocs" target="_blank">Documentação Oficial</a>
+</template>
+```
+
+<Aside type="tip">
+Na prática, você quase sempre usará o atalho `:` para vincular atributos. Acostume-se com ele!
+</Aside>
+
+### 3. Escuta de Eventos: `v-on`
+
+Precisamos de uma maneira de reagir a eventos do usuário, como cliques, envios de formulário e movimentos do mouse. Para isso, usamos a diretiva `v-on`.
+
+```vue
+<script setup>
+function saudacao() {
+  alert('Olá! Você clicou no botão.');
+}
+</script>
+
+<template>
+  <button v-on:click="saudacao">Clique em mim</button>
+</template>
+```
+Neste exemplo, quando o botão é clicado, a função `saudacao` definida no `<script setup>` é executada.
+
+#### Atalho para `v-on`
+
+Assim como `v-bind`, `v-on` também tem um atalho muito comum: o símbolo de arroba (`@`).
+
+`v-on:click` é exatamente o mesmo que `@click`.
+
+```vue
+<!-- Mesma funcionalidade, sintaxe preferida! -->
+<script setup>
+function saudacao() {
+  alert('Olá! Você clicou no botão.');
+}
+</script>
+
+<template>
+  <button @click="saudacao">Clique em mim</button>
+</template>
+```
+
+### O Problema da Reatividade
+
+Tente este desafio: crie uma variável `contador` e um botão que a incremente. Exiba o `contador` na tela. Você notará que, embora a variável mude (você pode ver com um `console.log`), o valor na tela **não se atualiza**.
+
+Isso acontece porque, até agora, estamos trabalhando com variáveis JavaScript comuns. O Vue não sabe que deve "reagir" quando elas mudam.
+
+No próximo tutorial, vamos resolver isso introduzindo o núcleo da reatividade do Vue: `ref` e `reactive`.

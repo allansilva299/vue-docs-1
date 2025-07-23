@@ -1,0 +1,131 @@
+---
+title: Renderização Condicional e de Listas
+description: "Aprenda a controlar o que é exibido na tela com v-if, v-else e v-show, e a renderizar listas de dados com v-for."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Com o poder da reatividade em mãos, agora podemos fazer algo extremamente útil: controlar a própria estrutura da nossa página. O Vue nos dá diretivas para adicionar ou remover elementos do DOM e para renderizar listas de elementos a partir de arrays.
+
+### Renderização Condicional com `v-if`
+
+A diretiva `v-if` é usada para renderizar um bloco de HTML condicionalmente. O bloco só será renderizado se a expressão da diretiva retornar um valor "verdadeiro" (truthy).
+
+```vue
+<script setup>
+import { ref } from 'vue';
+
+const mostrarMensagem = ref(true);
+</script>
+
+<template>
+  <button @click="mostrarMensagem = !mostrarMensagem">
+    Alternar Mensagem
+  </button>
+
+  <h1 v-if="mostrarMensagem">Você pode me ver!</h1>
+</template>
+```
+Neste exemplo, o `<h1>` é renderizado inicialmente. Ao clicar no botão, `mostrarMensagem` se torna `false`, e o Vue **remove completamente o `<h1>` do DOM**. Se clicar novamente, ele é recriado e inserido.
+
+#### Blocos com `v-else` e `v-else-if`
+
+Você também pode usar `v-else` para indicar um bloco alternativo, que será renderizado quando a expressão do `v-if` for falsa.
+
+```vue
+<script setup>
+import { ref } from 'vue';
+const logado = ref(false);
+</script>
+
+<template>
+  <button @click="logado = !logado">
+    {{ logado ? 'Sair' : 'Entrar' }}
+  </button>
+
+  <div v-if="logado">
+    <h2>Bem-vindo, usuário!</h2>
+  </div>
+  <div v-else>
+    <p>Por favor, faça o login.</p>
+  </div>
+</template>
+```
+
+Também existe o `v-else-if`, que funciona como em JavaScript, para criar condicionais mais complexas.
+
+### Condicional com `v-show`
+
+Uma alternativa ao `v-if` é a diretiva `v-show`. Ela funciona de forma parecida, mas com uma diferença crucial:
+
+-   `v-if`: É "preguiçoso". Ele garante que o elemento não seja renderizado no DOM. É mais pesado para alternar, pois envolve a criação e destruição de elementos.
+-   `v-show`: **Sempre** renderiza o elemento no DOM, mas alterna sua visibilidade usando a propriedade CSS `display: none`. É mais leve para alternar.
+
+<Aside type="tip" title="v-if vs. v-show: Qual usar?">
+- Use `v-if` se a condição raramente muda ou se o conteúdo dentro do bloco é pesado para renderizar. É ótimo para coisas como telas de login que só aparecem uma vez.
+- Use `v-show` se você precisa alternar a visibilidade de um elemento com muita frequência, como abas de um menu.
+</Aside>
+
+### Renderização de Listas com `v-for`
+
+Quase toda aplicação precisa exibir uma lista de itens. A diretiva `v-for` é a ferramenta perfeita para isso. Ela itera sobre um array (ou objeto) e renderiza um bloco de HTML para cada item.
+
+A sintaxe é `item in items`, onde `items` é o array de dados e `item` é o alias para o elemento do array sendo iterado.
+
+```vue
+<script setup>
+import { ref } from 'vue';
+
+const tarefas = ref([
+  { id: 1, texto: 'Aprender Vue' },
+  { id: 2, texto: 'Construir um projeto' },
+  { id: 3, texto: 'Dominar o mundo' }
+]);
+</script>
+
+<template>
+  <h2>Minha Lista de Tarefas</h2>
+  <ul>
+    <li v-for="tarefa in tarefas">
+      {{ tarefa.texto }}
+    </li>
+  </ul>
+</template>
+```
+
+#### A Chave `key`
+
+Sempre que usar `v-for`, o Vue exige que você forneça um atributo `:key` único para cada elemento da lista.
+
+> A `:key` ajuda o Vue a identificar cada nó da lista de forma eficiente, otimizando a performance ao reordenar, adicionar ou remover itens. Sem ela, o Vue pode se confundir e renderizar as coisas de forma incorreta ou ineficiente.
+
+A melhor `key` é um ID único que vem com seus dados.
+
+**Versão correta e otimizada:**
+```vue
+<script setup>
+import { ref } from 'vue';
+
+const tarefas = ref([
+  { id: 1, texto: 'Aprender Vue', completa: false },
+  { id: 2, texto: 'Construir um projeto', completa: true },
+  { id: 3, texto: 'Dominar o mundo', completa: false }
+]);
+</script>
+
+<template>
+  <h2>Minha Lista de Tarefas</h2>
+  <ul>
+    <!-- Usando v-for com :key e combinando com v-if -->
+    <li v-for="tarefa in tarefas" :key="tarefa.id">
+      {{ tarefa.texto }}
+      <span v-if="tarefa.completa"> (Concluída)</span>
+    </li>
+  </ul>
+</template>
+```
+
+<Aside type="caution">
+**Nunca** use o índice do array (`v-for="(item, index) in items" :key="index"`) como chave se a ordem dos itens da sua lista puder mudar. Isso pode causar problemas de renderização e bugs difíceis de rastrear. Use sempre um ID estável e único.
+</Aside>
+
+Com `v-if` e `v-for`, você já pode construir interfaces mais ricas e dinâmicas. O próximo passo é aprender a derivar dados e reagir a mudanças de forma mais inteligente.
