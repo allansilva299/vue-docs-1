@@ -17,6 +17,9 @@ export default defineConfig({
 			social: {
 				github: 'https://github.com/AllanSilva29/front-end-docs-1',
 			},
+			customCss: [
+				'./src/styles/theme.css',
+			],
 			sidebar: [
 				{
 					label: 'Guias',
