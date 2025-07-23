@@ -2,7 +2,7 @@
 
 Este README fornece instruções sobre como adicionar novo conteúdo à documentação de front-end baseada em Vue 3, Vuetify 3 e Nuxt 3, utilizando o Starlight (Astro). A pasta principal para o conteúdo do site é a `website/`.
 
-## Estrutura de Pastas Principal
+## Estrutura de Pastas Principal 
 
 O conteúdo do site que será publicado no GitHub Pages está localizado dentro da pasta `website/`. A estrutura relevante dentro de `website/` é:
 
