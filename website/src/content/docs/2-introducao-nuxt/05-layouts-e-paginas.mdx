@@ -1,0 +1,149 @@
+---
+title: Layouts e Páginas
+description: "Aprenda a criar layouts de página reutilizáveis, como o default.vue, e a aplicar layouts customizados em páginas específicas para manter seu código DRY."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+No [tutorial anterior](/vue-docs-1/2-introducao-nuxt/04-roteamento-baseado-em-arquivos), nós colocamos nosso menu de navegação diretamente no arquivo `app.vue`. Isso funciona, mas imagine que você queira que algumas páginas (como uma página de login) **não** tenham esse menu. É aqui que os layouts entram em jogo.
+
+Um layout é um componente "casca" que envolve o conteúdo das suas páginas. É o lugar perfeito para colocar elementos que se repetem, como cabeçalhos, rodapés, menus laterais e o próprio menu de navegação.
+
+### O Layout Padrão (`default.vue`)
+
+O Nuxt tem um conceito de layout padrão. Se você criar um arquivo chamado `default.vue` dentro da pasta `layouts/`, ele será automaticamente aplicado a todas as suas páginas.
+
+**Passo 1: Crie a pasta e o arquivo de layout**
+
+1.  Na raiz do seu projeto, crie a pasta `layouts`.
+2.  Dentro de `layouts`, crie o arquivo `default.vue`.
+
+**Passo 2: Mova a estrutura do `app.vue` para o layout**
+
+Vamos pegar o menu de navegação que estava em `app.vue` e movê-lo para o nosso novo layout.
+
+```vue
+<!-- src/layouts/default.vue -->
+<template>
+  <div>
+    <header>
+      <nav>
+        <NuxtLink to="/">Início</NuxtLink> |
+        <NuxtLink to="/sobre">Sobre</NuxtLink> |
+        <NuxtLink to="/servicos">Serviços</NuxtLink>
+      </nav>
+      <hr>
+    </header>
+
+    <main>
+      <!-- O conteúdo da página atual será injetado aqui -->
+      <slot />
+    </main>
+
+    <footer>
+      <hr>
+      <p>© 2024 - Meu App Nuxt Incrível</p>
+    </footer>
+  </div>
+</template>
+
+<style scoped>
+div {
+  font-family: sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+header, footer {
+  padding: 1rem 0;
+}
+nav a {
+  margin: 0 0.5rem;
+  text-decoration: none;
+}
+/* O Nuxt adiciona automaticamente a classe 'router-link-active' ao link da página ativa */
+.router-link-active {
+  font-weight: bold;
+}
+</style>
+```
+
+<Aside type="note" title="O que é o <slot />?">
+O componente `<slot />` (sim, o mesmo que aprendemos nos fundamentos do Vue) é o espaço reservado essencial dentro de um layout. O Nuxt irá injetar o conteúdo do componente da página atual (que vem do `<NuxtPage />` em `app.vue`) exatamente neste local.
+</Aside>
+
+**Passo 3: Simplifique o `app.vue`**
+
+Agora que a estrutura está no layout, nosso `app.vue` pode ficar extremamente limpo.
+
+```vue
+<!-- src/app.vue (versão final e limpa) -->
+<template>
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+</template>
+```
+
+Salve tudo e veja sua aplicação. Todas as páginas (`/`, `/sobre`, `/servicos`) agora têm o mesmo cabeçalho e rodapé!
+
+### Layouts Customizados
+
+E a nossa página de login? Vamos criar um layout sem o menu de navegação e o rodapé.
+
+**Passo 1: Crie um layout customizado**
+
+Crie o arquivo `layouts/auth.vue`.
+
+```vue
+<!-- src/layouts/auth.vue -->
+<template>
+  <div class="auth-layout">
+    <h2>Área de Autenticação</h2>
+    <main>
+      <slot />
+    </main>
+  </div>
+</template>
+
+<style scoped>
+.auth-layout {
+  background-color: #f0f8ff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+```
+
+**Passo 2: Crie uma página e aplique o layout**
+
+Crie a página `pages/login.vue`. Para dizer a esta página para usar o layout `auth` em vez do `default`, usamos a macro `definePageMeta`.
+
+```vue
+<!-- src/pages/login.vue -->
+<script setup>
+// Define metadados específicos da página, como layout, middleware, etc.
+definePageMeta({
+  // O nome do arquivo do layout (sem a extensão .vue)
+  layout: 'auth',
+});
+</script>
+
+<template>
+  <div>
+    <h3>Faça seu Login</h3>
+    <form>
+      <input type="email" placeholder="Email">
+      <br>
+      <input type="password" placeholder="Senha">
+      <br>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+</template>
+```
+Agora, acesse `http://localhost:3000/login`. Você verá a página de login com o fundo azul e sem o menu de navegação, enquanto as outras páginas continuam usando o layout padrão.
+
+O uso de layouts é fundamental para manter seu código limpo, organizado e fácil de manter. Agora que nossas páginas têm uma estrutura sólida, o próximo passo é preenchê-las com dados dinâmicos de uma API.

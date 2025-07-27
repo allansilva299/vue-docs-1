@@ -1,0 +1,88 @@
+---
+title: Introdução ao Diretório server/
+description: "Descubra como transformar seu projeto Nuxt em uma aplicação full-stack criando seus próprios endpoints de API dentro do diretório server/api."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Até agora, consumimos dados de uma API externa (a JSONPlaceholder). Mas e se precisássemos criar nossa própria lógica de backend? Talvez para conectar a um banco de dados, proteger chaves de API secretas, ou processar dados de um formulário.
+
+O Nuxt oferece uma solução integrada para isso: o diretório `server/`. Qualquer código que você colocar aqui rodará exclusivamente no ambiente do servidor (Node.js), nunca sendo exposto ao navegador do cliente.
+
+Isto transforma o Nuxt de um simples framework de frontend em uma solução **full-stack**.
+
+### Criando sua Primeira Rota de API
+
+A maneira mais comum de usar o diretório `server/` é criando rotas de API na subpasta `server/api/`. Assim como as páginas, as rotas de API também são baseadas em arquivos.
+
+**Passo 1: Crie a estrutura e o arquivo**
+
+1.  Na raiz do seu projeto, crie a pasta `server`.
+2.  Dentro de `server`, crie outra pasta chamada `api`.
+3.  Dentro de `server/api/`, crie um arquivo chamado `hello.ts`. O Nuxt usa a extensão `.ts` (TypeScript) por padrão para seus arquivos de servidor, mas você pode usar `.js` se preferir.
+
+    A estrutura ficará assim: `server/api/hello.ts`
+
+**Passo 2: Escreva o manipulador de eventos (event handler)**
+
+Dentro do arquivo `hello.ts`, vamos exportar uma função especial chamada `defineEventHandler`. Esta função recebe um objeto de evento e deve retornar os dados que a API irá servir.
+
+```typescript
+// src/server/api/hello.ts
+
+export default defineEventHandler((event) => {
+  // O que for retornado aqui será a resposta da API em formato JSON.
+  return {
+    message: 'Olá, mundo, direto do servidor Nuxt!',
+    timestamp: new Date().toISOString(),
+  };
+});
+```
+<Aside type="note">
+`defineEventHandler` é um helper do [Nitro](https://nitro.build/guide) (o servidor web que alimenta o Nuxt) que fornece tipos e contexto para sua rota de API, tornando o desenvolvimento mais seguro e fácil. Leia mais sobre na [documentação](https://nuxt.com/docs/3.x/guide/directory-structure/server).
+</Aside>
+
+**Passo 3: Teste a API**
+
+Salve o arquivo. O Nuxt detectará automaticamente a nova rota de API. Você pode testá-la diretamente no seu navegador ou em uma ferramenta como o Postman.
+
+Acesse: `http://localhost:3000/api/hello`
+
+Você deverá ver a seguinte resposta JSON:
+```json
+{
+  "message": "Olá, mundo, direto do servidor Nuxt!",
+  "timestamp": "2024-05-21T10:30:00.123Z"
+}
+```
+
+### Consumindo sua Própria API
+
+Agora, o mais legal: você pode consumir essa API de dentro das suas páginas Nuxt usando o mesmo `useFetch` que já aprendemos!
+
+Crie uma nova página em `pages/teste-api.vue`:
+
+```vue
+<!-- src/pages/teste-api.vue -->
+<script setup>
+// O Nuxt é inteligente. Ao usar useFetch com um caminho relativo que começa com /api/,
+// ele sabe que está chamando sua própria API interna, otimizando a chamada.
+const { data, pending, error } = await useFetch('/api/hello');
+</script>
+
+<template>
+  <div>
+    <h1>Testando nossa API interna</h1>
+    <div v-if="pending">Carregando...</div>
+    <div v-else-if="error">Erro: {{ error.message }}</div>
+    <pre v-else>{{ data }}</pre>
+  </div>
+</template>
+```
+
+Acesse `http://localhost:3000/teste-api`. A página irá chamar sua rota `/api/hello`, obter os dados e exibi-los.
+
+### Por que usar?
+
+-   **Segurança:** Você pode colocar chaves de API secretas ou credenciais de banco de dados no seu código do lado do servidor. Elas nunca serão enviadas para o navegador.
+-   **Simplicidade:** Não há necessidade de gerenciar um projeto de backend separado para tarefas simples. Tudo vive no mesmo repositório.
+-   **Performance:** Quando um componente no servidor (`useFetch` no SSR) chama uma API do servidor, a comunicação é interna e extremamente rápida, sem passar pela internet pública.

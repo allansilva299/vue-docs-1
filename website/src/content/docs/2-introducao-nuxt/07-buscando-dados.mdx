@@ -1,0 +1,220 @@
+---
+title: Buscando Dados com useFetch
+description: "Aprenda a buscar dados de APIs de forma eficiente e otimizada para SSR com o composable useFetch do Nuxt."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Aplicações web raramente são estáticas. Na maioria das vezes, precisamos buscar dados de uma API externa para exibir posts de um blog, produtos de uma loja, ou informações de usuários. No Nuxt, a forma recomendada para fazer isso é com o composable `useFetch`.
+
+### Por que não usar o `fetch` nativo?
+
+Você poderia usar o `fetch()` do JavaScript dentro do hook `onMounted`, mas isso traria um grande problema em um ambiente Nuxt:
+
+-   **Ocorre apenas no cliente:** A busca de dados só começaria depois que a página fosse carregada no navegador do usuário.
+-   **Péssimo para [SEO](https://developers.google.com/search/docs/fundamentals/seo-starter-guide):** O HTML enviado pelo servidor estaria vazio, sem os dados da API.
+-   **Experiência do usuário ruim:** O usuário veria um "loader" ou conteúdo em branco enquanto os dados são carregados.
+
+### A Magia do `useFetch`
+
+O `useFetch` é um ["wrapper"](https://escolalbk.com.br/glossario/o-que-e-wrapper/) em torno do `fetch` que resolve todos esses problemas. Ele é "isomórfico", o que significa que ele pode rodar tanto no servidor quanto no cliente.
+
+-   **Na primeira visita (SSR):** O `useFetch` executa **no servidor**. Ele pausa a renderização da página, busca os dados da API, e então renderiza a página já com os dados incluídos no HTML final.
+-   **Durante a navegação (CSR):** Quando você clica em um `<NuxtLink>`, o `useFetch` executa **no cliente**, como em uma SPA tradicional.
+
+Isso nos dá o melhor dos dois mundos: carregamento inicial rápido e ótimo para SEO, e navegação subsequente rápida no cliente.
+
+### Usando `useFetch` na Prática
+
+Vamos criar uma página que busca e exibe uma lista de posts de uma API de testes, a [JSONPlaceholder](https://jsonplaceholder.typicode.com/).
+
+Crie o arquivo `pages/posts.vue`.
+
+```vue
+<!-- src/pages/posts.vue -->
+<script setup>
+// A URL da API que queremos chamar
+const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
+
+// useFetch retorna um conjunto de refs reativos
+const { data: posts, pending, error, refresh } = await useFetch(apiUrl);
+
+// data: O resultado da requisição (renomeado para 'posts' para clareza).
+// pending: Um booleano que é 'true' enquanto a requisição está em andamento.
+// error: Um objeto de erro se a requisição falhar.
+// refresh: Uma função para recarregar os dados manualmente.
+</script>
+
+<template>
+  <div>
+    <h1>Blog Posts</h1>
+
+    <!-- 1. Mostra uma mensagem de carregamento -->
+    <div v-if="pending">
+      Carregando posts...
+    </div>
+
+    <!-- 2. Mostra uma mensagem de erro se algo der errado -->
+    <div v-else-if="error">
+      <p>Ocorreu um erro ao buscar os posts: {{ error.message }}</p>
+      <button @click="refresh">Tentar Novamente</button>
+    </div>
+
+    <!-- 3. Renderiza a lista de posts quando os dados estiverem disponíveis -->
+    <ul v-else>
+      <li v-for="post in posts" :key="post.id">
+        {{ post.title }}
+      </li>
+    </ul>
+  </div>
+</template>
+```
+
+<Aside type="note" title="O que é o `await`?">
+Repare no `await useFetch(...)`. Graças a um recurso do Vue 3 chamado `<Suspense>`, podemos usar `await` diretamente no `<script setup>`. O Nuxt pausa a renderização do componente até que a promessa do `useFetch` seja resolvida, simplificando enormemente o código assíncrono.
+</Aside>
+
+### Buscando Dados para uma Página Dinâmica
+
+O `useFetch` é ainda melhor em páginas dinâmicas. Vamos criar uma página de detalhes para cada post.
+
+Crie o arquivo `pages/posts/[id].vue`.
+
+```vue
+<!-- src/pages/posts/[id].vue -->
+<script setup>
+const route = useRoute();
+const postId = route.params.id;
+
+// O useFetch é inteligente. Se você passar uma URL reativa (usando uma função ou uma computada),
+// ele irá automaticamente refazer a requisição sempre que a URL mudar
+const { data: post, pending, error } = await useFetch(
+  () => `https://jsonplaceholder.typicode.com/posts/${postId}`
+);
+</script>
+
+<template>
+  <div>
+    <NuxtLink to="/posts">Voltar para a lista</NuxtLink>
+    <hr>
+    <div v-if="pending">Carregando...</div>
+    <article v-else-if="post">
+      <h1>{{ post.title }}</h1>
+      <p>{{ post.body }}</p>
+    </article>
+    <div v-else-if="error">
+      <p>Post não encontrado ou erro na requisição.</p>
+    </div>
+  </div>
+</template>
+```
+Agora, modifique a lista em `pages/posts.vue` para linkar para a página de detalhes:
+
+```html
+<!-- Dentro do v-for em pages/posts.vue -->
+<li v-for="post in posts" :key="post.id">
+  <NuxtLink :to="`/posts/${post.id}`">
+    {{ post.title }}
+  </NuxtLink>
+</li>
+```
+Agora você tem uma lista de posts e páginas de detalhes que buscam seus próprios dados de forma otimizada para performance e SEO.
+
+### `useFetch` vs. `useAsyncData`: Qual a Diferença?
+
+Você pode ter visto a função `useAsyncData` na [documentação](https://nuxt.com/docs/3.x/api/composables/use-async-data) do Nuxt e se perguntado qual a diferença. A resposta é simples:
+
+**`useFetch` é um atalho conveniente para o `useAsyncData`.**
+
+Pense neles assim: `useFetch` é uma ferramenta especializada para a tarefa mais comum (chamar uma API), enquanto `useAsyncData` é uma ferramenta mais genérica e melhorada.
+
+- `useFetch(url)` é essencialmente o mesmo que `useAsyncData(url, () => $fetch(url))`.
+
+Vamos detalhar quando e por que usar cada um.
+
+#### Use `useFetch` quando...
+
+Sua tarefa é simplesmente **fazer uma requisição HTTP para uma URL**. Isso cobre 90% dos casos de busca de dados.
+
+**Por que é melhor para isso?**
+1.  **Concisão:** O código é mais curto e direto.
+2.  **Geração Automática de Chave:** `useFetch` cria automaticamente uma chave de cache única baseada na URL. Isso é crucial para o Nuxt evitar refazer a mesma requisição desnecessariamente, melhorando a performance.
+
+```vue
+<script setup>
+// Perfeito para useFetch: uma simples chamada de API.
+const { data: user } = await useFetch('/api/users/1');
+</script>
+```
+
+#### Use `useAsyncData` quando...
+
+Você precisa executar **qualquer lógica assíncrona que NÃO seja uma simples requisição `fetch`**, e quer que o resultado esteja disponível no lado do servidor.
+
+**Quando escolher `useAsyncData`?**
+
+1.  **Quando a lógica da requisição é complexa:** Por exemplo, você precisa buscar um token de autenticação primeiro e depois fazer uma segunda chamada usando esse token.
+
+    ```javascript
+    const { data } = await useAsyncData('user-posts', async () => {
+      // $fetch é o utilitário de busca (fetch) do Nuxt 3 que simplifica requisições HTTP
+      // e lida automaticamente com serialização, headers e base URL no lado cliente ou servidor
+      const token = await $fetch('/api/token');
+      const posts = await $fetch('/api/posts', { 
+        headers: { Authorization: `Bearer ${token}` } 
+      });
+      return posts; // O que for retornado aqui se torna o 'data'.
+    });
+    ```
+<Aside type="note" title="useFetch ou $fetch?">
+É muito importante não confundir o composable `useFetch` com o utilitário `$fetch`. Eles têm propósitos diferentes.
+
+- **`useFetch` é um COMPOSABLE para buscar dados para um COMPONENTE.**
+  - **Uso:** Deve ser usado diretamente no `<script setup>` de uma página ou componente.
+  - **Função:** Gerencia todo o ciclo de vida da requisição. Ele te dá o estado (`pending`, `error`), os dados (`data`) e é otimizado para SSR (executa no servidor na primeira carga e no cliente na navegação).
+  - **Pense nele como:** "A forma de carregar os dados necessários para renderizar esta página".
+
+- **`$fetch` é um UTILITÁRIO para fazer uma requisição HTTP.**
+  - **Uso:** Pode ser usado em qualquer lugar: dentro de uma função de clique, em uma rota de API no servidor (`/server/api`), ou dentro de um `useAsyncData`.
+  - **Função:** Apenas faz a requisição e retorna uma `Promise` com os dados. Ele **não** gerencia estado de `pending` ou `error` para você.
+  - **Pense nele como:** "Uma substituição moderna e mais inteligente para o `fetch` nativo ou o `axios`".
+
+**Regra Prática:**
+- Precisa buscar dados para **exibir na tela quando a página carrega**? Use **`useFetch`**.
+- Precisa **enviar dados (POST, PUT)** ou buscar algo em resposta a um **evento do usuário (ex: `@click`)**? Use **`$fetch`**.
+
+```vue
+<script setup>
+// CORRETO: Carregando dados iniciais da página.
+const { data: posts } = useFetch('/api/posts');
+
+async function criarNovoPost() {
+  // CORRETO: Enviando dados em resposta a uma ação.
+  await $fetch('/api/posts', { method: 'POST', body: { title: 'Novo Post' } });
+  // ... talvez precise recarregar a lista depois
+}
+</script>
+```
+</Aside>
+
+2.  **Ao usar SDKs de terceiros:** Se você está integrando um CMS (como Contentful, Prismic) ou um serviço (como Stripe) que fornece seu próprio kit de desenvolvimento (SDK).
+
+    ```javascript
+    import { stripe } from '~/server/lib/stripe'; // Exemplo
+
+    const { data: products } = await useAsyncData('stripe-products', () => {
+      // Esta não é uma chamada fetch, é um método do SDK do Stripe
+      return stripe.products.list({ limit: 3 });
+    });
+    ```
+
+<Aside type="caution" title="Não se esqueça da Chave!">
+Ao usar `useAsyncData`, você **deve** fornecer uma chave única como primeiro argumento (ex: `'user-posts'`). Como sua lógica pode ser complexa, o Nuxt não tem como adivinhar uma chave para o cache, então você precisa informá-la manualmente.
+</Aside>
+
+### A Regra de Ouro
+
+-   Tem uma **URL de API** para chamar? → Use **`useFetch`**.
+-   Tem **qualquer outra tarefa assíncrona**? → Use **`useAsyncData`**.
+
+Dominar a busca de dados é fundamental para criar aplicações web úteis. A seguir, veremos como criar nossa própria API dentro do Nuxt.
+

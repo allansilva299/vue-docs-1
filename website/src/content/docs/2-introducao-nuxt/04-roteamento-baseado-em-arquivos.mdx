@@ -1,0 +1,134 @@
+---
+title: Roteamento Baseado em Arquivos
+description: "Aprenda a criar rotas estáticas e dinâmicas no Nuxt simplesmente criando arquivos .vue na pasta 'pages', e a navegar entre elas com <NuxtLink>."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+No Nuxt, as rotas da sua aplicação são um reflexo direto da estrutura de arquivos dentro da pasta `pages/`. Vamos ver como isso funciona na prática.
+
+### Preparando o Terreno
+
+1.  No seu projeto Nuxt, **crie uma nova pasta** chamada `pages` na raiz.
+2.  **Abra o arquivo `app.vue`** e substitua todo o seu conteúdo por este único componente:
+
+    ```vue
+    <!-- src/app.vue -->
+    <template>
+      <div>
+        <!-- O NuxtPage funciona como o <router-view> do Vue Router -->
+        <!-- Ele renderizará o componente da página correspondente à rota atual -->
+        <NuxtPage />
+      </div>
+    </template>
+    ```
+
+<Aside>
+O componente `<NuxtPage />` é essencial. Ele atua como um espaço reservado onde o Nuxt irá injetar o conteúdo da página que corresponde à URL acessada.
+</Aside>
+
+### Criando Páginas Estáticas
+
+Vamos criar três páginas básicas: uma página inicial, uma página "Sobre" e uma página de "Serviços".
+
+1.  **Página Inicial (`/`)**
+    Crie o arquivo `pages/index.vue`:
+    ```vue
+    <!-- src/pages/index.vue -->
+    <template>
+      <h1>Página Inicial</h1>
+      <p>Bem-vindo ao nosso site!</p>
+    </template>
+    ```
+
+2.  **Página Sobre (`/sobre`)**
+    Crie o arquivo `pages/sobre.vue`:
+    ```vue
+    <!-- src/pages/sobre.vue -->
+    <template>
+      <h1>Sobre Nós</h1>
+      <p>Esta é a página sobre a nossa empresa.</p>
+    </template>
+    ```
+
+3.  **Página de Serviços (`/servicos`)**
+    Crie o arquivo `pages/servicos.vue`:
+    ```vue
+    <!-- src/pages/servicos.vue -->
+    <template>
+      <h1>Nossos Serviços</h1>
+      <ul>
+        <li>Desenvolvimento Web</li>
+        <li>Consultoria</li>
+      </ul>
+    </template>
+    ```
+
+Agora, salve os arquivos. O servidor de desenvolvimento do Nuxt detectará as mudanças automaticamente. Acesse as seguintes URLs no seu navegador:
+- `http://localhost:3000/` -> Mostrará o conteúdo de `index.vue`.
+- `http://localhost:3000/sobre` -> Mostrará o conteúdo de `sobre.vue`.
+- `http://localhost:3000/servicos` -> Mostrará o conteúdo de `servicos.vue`.
+
+Simples assim! Você criou três rotas sem escrever uma única linha de configuração de roteamento.
+
+### Navegando entre Páginas com `<NuxtLink>`
+
+Para criar links entre as páginas, não use a tag `<a>` normal, pois ela recarrega a página inteira. Em vez disso, use o componente `<NuxtLink>`.
+
+Vamos adicionar um menu de navegação em `app.vue`.
+
+```vue
+<!-- src/app.vue (modificado) -->
+<template>
+  <div>
+    <header>
+      <nav>
+        <NuxtLink to="/">Início</NuxtLink> |
+        <NuxtLink to="/sobre">Sobre</NuxtLink> |
+        <NuxtLink to="/servicos">Serviços</NuxtLink>
+      </nav>
+    </header>
+    <hr />
+    <main>
+      <NuxtPage />
+    </main>
+  </div>
+</template>
+```
+O `<NuxtLink>` fará a navegação no lado do cliente (Client-Side Navigation), trocando apenas o componente da página sem um refresh completo, o que é muito mais rápido.
+
+### Rotas Dinâmicas
+
+E se precisarmos de uma página de perfil para cada usuário, como `/usuarios/maria` ou `/usuarios/joao`? Criar um arquivo para cada um seria inviável. Para isso, usamos **rotas dinâmicas**.
+
+Crie uma estrutura de pastas e um arquivo com colchetes `[]` no nome: `pages/usuarios/[id].vue`. O nome dentro dos colchetes se torna o nome do parâmetro da rota.
+
+1.  Crie a pasta `usuarios` dentro de `pages`.
+2.  Dentro de `pages/usuarios/`, crie o arquivo `[id].vue`.
+
+    ```vue
+    <!-- src/pages/usuarios/[id].vue -->
+    <script setup>
+    // Para acessar os parâmetros da rota, usamos o composable useRoute()
+    const route = useRoute();
+    const userId = route.params.id;
+    </script>
+    
+    <template>
+      <h1>Perfil do Usuário</h1>
+      <p>Você está vendo o perfil de: <strong>{{ userId }}</strong></p>
+    </template>
+    ```
+Agora, acesse `http://localhost:3000/usuarios/ana` ou `http://localhost:3000/usuarios/123`. Você verá que a página renderiza o valor do parâmetro `id` da URL.
+
+Para linkar para uma rota dinâmica:
+
+```html
+<NuxtLink to="/usuarios/maria">Ver perfil da Maria</NuxtLink>
+<NuxtLink to="/usuarios/pedro">Ver perfil do Pedro</NuxtLink>
+```
+
+<Aside type="tip" title="Rotas Aninhadas">
+Você pode criar rotas aninhadas criando pastas. `pages/painel/configuracoes.vue` se tornará a rota `/painel/configuracoes`.
+</Aside>
+
+O roteamento baseado em arquivos é uma das funcionalidades que torna o desenvolvimento com Nuxt tão rápido e intuitivo. No próximo tutorial, aprenderemos a dar uma aparência consistente a todas essas páginas usando Layouts.

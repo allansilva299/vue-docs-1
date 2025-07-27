@@ -1,0 +1,63 @@
+---
+title: O que é Nuxt e por que usá-lo?
+description: "Descubra o que é o Nuxt, por que ele é chamado de meta-framework do Vue, e os problemas que ele resolve, como SSR e roteamento automático."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Se o Vue.js é o motor de um carro — potente, eficiente e o coração de tudo — o **Nuxt.js é o carro completo**. Ele é o chassi, a carroceria, o painel e o sistema de navegação GPS, tudo pré-montado e otimizado para extrair a melhor performance do motor Vue.
+
+Nuxt é um **meta-framework** do Vue. Ele não substitui o Vue; ele o **aprimora**, fornecendo uma estrutura e um conjunto de ferramentas para resolver os desafios mais comuns do desenvolvimento web moderno.
+
+### O Principal Problema que o Nuxt Resolve: Onde o seu Código Roda
+
+Uma aplicação Vue padrão, criada com `npm create vue@latest`, é uma **SPA (Single Page Application)**. Isso significa que ela utiliza **Renderização no Lado do Cliente (CSR - Client-Side Rendering)**.
+
+<Aside type="caution" title="Como funciona o CSR?">
+1. O usuário acessa seu site.
+2. O servidor envia um arquivo HTML quase vazio, com um link para um grande arquivo JavaScript.
+3. O navegador do usuário baixa e executa esse JavaScript.
+4. O Vue, rodando no navegador, finalmente renderiza a página e a exibe para o usuário.
+
+**Problemas:**
+- **SEO Ruim:** Mecanismos de busca (como o Google) podem ter dificuldade em indexar a página, pois recebem um HTML vazio inicialmente.
+- **Performance Inicial Lenta:** O usuário vê uma tela em branco até que todo o JavaScript seja baixado e executado.
+</Aside>
+
+O Nuxt resolve isso oferecendo modos de renderização mais avançados:
+
+#### 1. Renderização no Lado do Servidor (SSR - Server-Side Rendering)
+
+Com o Nuxt, sua aplicação Vue pode rodar primeiro no servidor.
+
+1. O usuário acessa seu site.
+2. O **servidor Node.js** executa seu código Vue, monta a página completa em HTML e a envia para o navegador.
+3. O navegador exibe o HTML imediatamente.
+4. Em seguida, o JavaScript é baixado em segundo plano para tornar a página interativa (processo chamado de "hidratação").
+
+**Vantagens:**
+- **Excelente SEO:** O Google recebe a página totalmente renderizada.
+- **Melhor Performance Percebida:** O usuário vê o conteúdo muito mais rápido.
+
+#### 2. Geração de Site Estático (SSG - Static-Site Generation)
+
+Este é o modo mais rápido de todos. Durante o processo de "build" (quando você prepara seu site para produção), o Nuxt pré-renderiza **todas** as suas páginas em arquivos HTML puros.
+
+1. Você executa o comando de build.
+2. O Nuxt acessa suas rotas, busca dados de APIs se necessário, e gera um arquivo `index.html`, `sobre.html`, `contato.html`, etc.
+3. Você hospeda esses arquivos em qualquer servidor estático.
+
+**Vantagens:**
+- **Performance Absurda:** Não há servidor para processar nada; os arquivos estão prontos.
+- **Segurança e Custo:** Hospedagem estática é mais barata e segura.
+- Ideal para sites cujo conteúdo não muda a todo segundo, como blogs, portfólios e sites de documentação.
+
+### Outras Vantagens Mágicas (Developer Experience)
+
+Além dos modos de renderização, o Nuxt oferece uma experiência de desenvolvimento (DX) formidável:
+
+-   **Roteamento Baseado em Arquivos:** Crie um arquivo em `pages/sobre.vue` e a rota `/sobre` é criada automaticamente. Chega de configurar rotas manualmente!
+-   **Auto-imports:** Componentes na pasta `components/` e funções na pasta `composables/` estão disponíveis em toda a sua aplicação sem precisar importá-los.
+-   **Servidor de API Integrado:** A pasta `server/api/` permite que você crie seus próprios endpoints de API dentro do mesmo projeto.
+-   **Ecossistema de Módulos:** Uma vasta coleção de módulos para adicionar funcionalidades como otimização de imagens, gerenciamento de conteúdo, integração com bibliotecas de UI e muito mais.
+
+Em resumo, você usa Nuxt porque ele pega tudo o que você gosta no Vue e o coloca em uma estrutura pronta para produção, resolvendo problemas complexos de performance e SEO de forma elegante e, na maior parte do tempo, automática.

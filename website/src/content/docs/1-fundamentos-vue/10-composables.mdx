@@ -1,0 +1,118 @@
+---
+title: "Composables: Lógica Reutilizável"
+description: "Aprenda a criar e usar Composables, o padrão da Composition API para extrair e reutilizar lógica com estado (stateful logic) entre componentes."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+À medida que suas aplicações crescem, você notará que certas lógicas se repetem em vários componentes. Por exemplo, a lógica para rastrear a posição do mouse, para buscar dados de um usuário, ou para gerenciar o estado de um formulário.
+
+Na Composition API, o padrão para extrair e reutilizar essa **lógica com estado** (stateful logic) é através de uma função **Composable**.
+
+> Um **Composable** é simplesmente uma função que encapsula e retorna estado reativo (`ref`, `reactive`), métodos e outras funcionalidades da Composition API (`computed`, `watch`, `onMounted`). Por convenção, seus nomes geralmente começam com a palavra `use` (ex: `useMouse`, `useFetch`).
+
+### O Problema: Lógica Duplicada
+
+Imagine que dois componentes diferentes precisam rastrear a posição do mouse. Sem composables, você teria que duplicar o código que vimos no capítulo anterior:
+
+```vue
+<!-- ComponenteA.vue -->
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+const x = ref(0);
+const y = ref(0);
+// ... toda a lógica de add/remove event listener ...
+</script>
+<template>Posição A: {{ x }}, {{ y }}</template>
+
+<!-- ComponenteB.vue -->
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+const x = ref(0);
+const y = ref(0);
+// ... a MESMA lógica de add/remove event listener ...
+</script>
+<template>Posição B: {{ x }}, {{ y }}</template>
+```
+Isso não é sustentável. Se precisarmos corrigir um bug, teremos que fazê-lo em dois lugares.
+
+### A Solução: Criando um Composable `useMouse`
+
+Vamos extrair essa lógica para um composable.
+
+**Passo 1: Crie o arquivo do composable**
+
+Por convenção, criamos uma pasta `composables/` na raiz do nosso `src/` para organizar essas funções.
+
+Crie o arquivo `src/composables/useMouse.js`.
+
+```javascript
+// src/composables/useMouse.js
+import { ref, onMounted, onUnmounted } from 'vue';
+
+// Por convenção, o nome do composable começa com "use"
+export function useMouse() {
+  // 1. O estado encapsulado dentro do composable
+  const x = ref(0);
+  const y = ref(0);
+
+  // 2. A lógica que manipula o estado
+  function update(event) {
+    x.value = event.pageX;
+    y.value = event.pageY;
+  }
+
+  // 3. Os hooks do ciclo de vida, também encapsulados
+  onMounted(() => window.addEventListener('mousemove', update));
+  onUnmounted(() => window.removeEventListener('mousemove', update));
+
+  // 4. Exponha o estado e os métodos que o componente precisará
+  return { x, y };
+}
+```
+
+<Aside type="note">
+Cada componente que usar o `useMouse` terá sua própria instância do estado (`x`, `y`) e do ciclo de vida. O estado não é compartilhado entre eles (a menos que você o projete para ser, o que é um tópico mais avançado).
+</Aside>
+
+**Passo 2: Use o composable nos componentes**
+
+Agora, nossos componentes ficam incrivelmente limpos e declarativos.
+
+```vue
+<!-- ComponenteA.vue -->
+<script setup>
+// 1. Importe o composable
+import { useMouse } from '../composables/useMouse.js';
+
+// 2. Chame a função para obter o estado e os métodos
+const { x, y } = useMouse();
+</script>
+
+<template>
+  <h1>Posição do Mouse (Componente A)</h1>
+  <p>x: {{ x }}, y: {{ y }}</p>
+</template>
+```
+
+```vue
+<!-- ComponenteB.vue -->
+<script setup>
+import { useMouse } from '../composables/useMouse.js';
+
+const { x, y } = useMouse(); // Instância separada do estado
+</script>
+
+<template>
+  <h2>Outra Leitura da Posição do Mouse (Componente B)</h2>
+  <p>x: {{ x }}, y: {{ y }}</p>
+</template>
+```
+
+Conseguimos! Extraímos toda a lógica complexa para uma função reutilizável, e nossos componentes agora apenas **consomem** essa funcionalidade de uma forma muito mais clara.
+
+Você verá que todo o ecossistema Vue e Nuxt é construído em torno desse conceito:
+-   `useRoute()` e `useRouter()` do Vue Router são composables.
+-   `useFetch()` e `useAsyncData()` do Nuxt são composables.
+-   `defineProps()` e `defineEmits()` são "macros de compilador" que se comportam de forma muito parecida.
+
+Dominar a criação de composables é também um dos fundamentos para escrever código Vue 3 limpo, organizado e escalável.

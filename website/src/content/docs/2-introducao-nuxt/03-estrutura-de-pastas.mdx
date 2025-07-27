@@ -1,0 +1,64 @@
+---
+title: A Estrutura de Pastas Mágica do Nuxt
+description: "Entenda a função de cada diretório convencional do Nuxt, como pages, components, layouts, assets, public e server, e como eles automatizam seu desenvolvimento."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Diferente de um projeto Vue padrão, onde a organização de arquivos é uma decisão sua, o Nuxt utiliza uma **estrutura de pastas baseada em convenções**. Isso significa que, ao criar pastas com nomes específicos, o Nuxt automaticamente ativa suas funcionalidades, economizando uma quantidade enorme de configuração.
+
+Você não precisa criar todas essas pastas. Crie-as apenas quando precisar da funcionalidade que elas oferecem.
+
+Vamos conhecer as mais importantes:
+
+### `pages/`
+**Função:** Criação automática de rotas.
+Esta é, talvez, a pasta mais "mágica" de todas. Qualquer componente Vue (`.vue`) que você criar aqui se tornará uma rota na sua aplicação.
+- `pages/index.vue` -> `http://seusite.com/`
+- `pages/sobre.vue` -> `http://seusite.com/sobre`
+- `pages/contato.vue` -> `http://seusite.com/contato`
+Aprenderemos mais sobre rotas dinâmicas (como `pages/blog/[slug].vue`) no próximo checkpoint.
+
+<Aside>
+Ao criar a pasta `pages/`, você pode substituir o arquivo `app.vue` pelo componente `<NuxtPage />`. Ele funcionará como um `router-view` do [Vue Router](https://router.vuejs.org/guide/), renderizando o componente da página ativa.
+</Aside>
+
+### `components/`
+**Função:** Auto-importação de componentes.
+Qualquer componente Vue que você colocar aqui estará **automaticamente disponível** em todo o seu projeto, sem a necessidade de `import Componente from './components/Componente.vue'`.
+- Crie `components/MeuBotao.vue`.
+- Use-o em qualquer página ou layout como `<MeuBotao />`.
+O Nuxt cuida da importação por baixo dos panos, mantendo seu código mais limpo. Ele também é inteligente e só inclui no build final os componentes que você realmente usou (processo chamado de "tree-shaking").
+
+### `layouts/`
+**Função:** Estruturas de página reutilizáveis.
+Um layout é um componente "casca" que envolve suas páginas. É perfeito para elementos que se repetem em várias rotas, como um cabeçalho e um rodapé.
+- `layouts/default.vue` será aplicado a todas as páginas por padrão.
+- Você pode criar layouts customizados (ex: `layouts/admin.vue`) e escolher qual usar em cada página.
+
+### `composables/`
+**Função:** Auto-importação de funções da Composition API.
+Similar à pasta `components/`, qualquer função JavaScript ou TypeScript que você exportar de um arquivo dentro de `composables/` estará disponível globalmente. É o lugar perfeito para colocar sua lógica reutilizável, como `useContador.js` ou `useFormatadorDeData.js`.
+
+### `assets/`
+**Função:** Arquivos que serão processados pelo build.
+Use esta pasta para arquivos que precisam ser processados por ferramentas de build como [Vite](https://vite.dev/guide/) ou [Webpack](https://webpack.js.org/concepts/). Isso inclui:
+- Arquivos de estilo (CSS, SASS, LESS).
+- Fontes.
+- Imagens que você queira otimizar ou processar.
+Por exemplo, `assets/css/main.css` pode ser importado globalmente no seu `nuxt.config.ts`.
+
+### `public/`
+**Função:** Arquivos que devem ser servidos diretamente.
+Esta pasta é para arquivos que precisam estar disponíveis publicamente com um nome fixo, sem nenhum processamento. O conteúdo dela é simplesmente copiado para a raiz do seu site.
+- `public/favicon.ico` -> `http://seusite.com/favicon.ico`
+- `public/robots.txt` -> `http://seusite.com/robots.txt`
+- `public/img/logo-empresa.png` -> `http://seusite.com/img/logo-empresa.png`
+
+### `server/`
+**Função:** Lógica de backend e rotas de API.
+O Nuxt não é apenas para o frontend! A pasta `server/` transforma seu projeto em uma aplicação full-stack.
+- `server/api/` permite criar endpoints de API. Um arquivo `server/api/ola.ts` cria a rota `/api/ola`.
+- `server/middleware/` permite executar código no servidor antes de uma rota ser renderizada.
+- `server/routes/` permite definir rotas de servidor com regras mais complexas.
+
+Entender essa estrutura é a chave para a produtividade no Nuxt. No próximo tutorial, vamos colocar a pasta `pages/` em prática e ver o roteamento automático em ação.

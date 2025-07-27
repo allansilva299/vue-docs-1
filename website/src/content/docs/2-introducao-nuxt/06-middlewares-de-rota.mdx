@@ -1,0 +1,120 @@
+---
+title: Middlewares de Rota
+description: "Aprenda a interceptar a navegação com os middlewares do Nuxt para criar lógicas de autenticação, redirecionamentos e validações antes de uma página ser renderizada."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Em muitas aplicações, precisamos executar uma verificação antes de permitir que um usuário acesse uma determinada página. O exemplo mais clássico é a autenticação: "o usuário está logado? Se não, redirecione-o para a página de login".
+
+No Nuxt, o mecanismo para lidar com essa lógica é o **Middleware de Rota**.
+
+> Um **Middleware** é um trecho de código que é executado **antes** de uma página ser renderizada. Ele pode inspecionar a rota que está sendo acessada, verificar condições (como o estado de autenticação) e decidir se permite, redireciona ou impede a navegação.
+
+Existem três tipos de middleware no Nuxt:
+
+1.  **Middleware Anônimo (ou inline):** Definido diretamente no script de uma página.
+2.  **Middleware Nomeado:** Definido em um arquivo na pasta `middleware/` e aplicado seletivamente às páginas.
+3.  **Middleware Global:** Definido em um arquivo na pasta `middleware/` com o sufixo `.global`, que roda em **todas** as navegações.
+
+### 1. Middleware Nomeado (o mais comum)
+
+Vamos criar um middleware `auth` para proteger uma página de "Painel".
+
+**Passo 1: Crie o arquivo de middleware**
+
+1.  Na raiz do projeto, crie a pasta `middleware`.
+2.  Dentro dela, crie o arquivo `auth.ts` (ou `.js`). O nome do arquivo será o nome do middleware.
+
+```typescript
+// src/middleware/auth.ts
+
+// Um middleware recebe dois argumentos:
+// 'to': a rota para a qual o usuário está navegando.
+// 'from': a rota de onde o usuário está vindo.
+export default defineNuxtRouteMiddleware((to, from) => {
+  // Para este exemplo, vamos simular um estado de autenticação.
+  // Em uma aplicação real, isso viria de um cookie, localStorage ou de um state manager como Pinia.
+  const estaLogado = false; // Mude para 'true' para testar!
+
+  // Se o usuário não está logado E está tentando acessar a página do painel
+  if (!estaLogado && to.path === '/painel') {
+    console.log('BLOQUEADO PELO MIDDLEWARE AUTH!');
+    // Redireciona o usuário para a página de login.
+    return navigateTo('/login');
+  }
+
+  // Se a condição não for atendida, a navegação continua normalmente.
+  // Não é necessário retornar nada.
+});
+```
+
+**Passo 2: Aplique o middleware a uma página**
+
+Agora, vamos criar uma página `painel` e dizer a ela para usar nosso middleware `auth`.
+
+Crie o arquivo `pages/painel.vue`.
+
+```vue
+<!-- src/pages/painel.vue -->
+<script setup>
+definePageMeta({
+  // Aplique o middleware usando o nome do arquivo.
+  middleware: 'auth'
+  // Você pode aplicar múltiplos middlewares com um array: ['auth', 'outromiddleware']
+});
+</script>
+
+<template>
+  <h1>Área Restrita</h1>
+  <p>Se você está vendo isso, o middleware deixou você passar!</p>
+</template>
+```
+
+**Teste:**
+- Com `estaLogado` definido como `false` no middleware, tente acessar `http://localhost:3000/painel`. Você será imediatamente redirecionado para `/login`.
+- Mude `estaLogado` para `true` e tente novamente. Agora você conseguirá ver o conteúdo da página do painel.
+
+### 2. Middleware Inline
+
+Para lógicas muito simples e específicas de uma única página, você pode definir o middleware diretamente, sem criar um arquivo separado.
+
+```vue
+<!-- src/pages/admin-somente.vue -->
+<script setup>
+definePageMeta({
+  middleware: [
+    function (to, from) {
+      // Lógica de middleware inline
+      const userIsAdmin = false; // Lógica para verificar se é admin
+      if (!userIsAdmin) {
+        return navigateTo('/');
+      }
+    }
+  ]
+});
+</script>
+
+<template>
+  <h1>Página Super Secreta do Admin</h1>
+</template>
+```
+<Aside type="caution">
+Use middlewares inline com moderação. Se a lógica for reutilizável ou complexa, é sempre melhor criar um middleware nomeado.
+</Aside>
+
+### 3. Middleware Global
+
+Um middleware global é útil para lógicas que precisam rodar em absolutamente todas as trocas de rota, como registrar eventos de analytics.
+
+Para criar um, basta nomear o arquivo com o sufixo `.global`. Por exemplo, `middleware/analytics.global.ts`.
+
+```typescript
+// src/middleware/analytics.global.ts
+export default defineNuxtRouteMiddleware((to, from) => {
+  console.log(`Navegando de ${from.path} para ${to.path}`);
+  // Aqui você poderia chamar um serviço de analytics.
+});
+```
+Este middleware rodará automaticamente em todas as navegações, sem precisar ser declarado no `definePageMeta`.
+
+Middlewares são uma ferramenta essencial para controlar o fluxo da sua aplicação, garantindo segurança e uma experiência de usuário consistente.

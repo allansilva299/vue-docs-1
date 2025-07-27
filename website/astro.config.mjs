@@ -34,6 +34,10 @@ export default defineConfig({
 					label: 'Fundamentos do Vue 3',
 					autogenerate: { directory: '1-fundamentos-vue' },
 				},
+				{
+					label: 'Introdução ao Nuxt 3',
+					autogenerate: { directory: '2-introducao-nuxt' },
+				},
 			],
 		}),
 	],

@@ -1,0 +1,81 @@
+---
+title: Configurando um Novo Projeto Nuxt
+description: "Um guia passo a passo para instalar e rodar sua primeira aplicação Nuxt 3 usando o comando nuxi."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Criar um projeto Nuxt é tão simples quanto criar um projeto Vue, graças à sua ferramenta de linha de comando, a **Nuxi**.
+
+### Pré-requisitos
+
+Assim como no Vue, você precisa ter uma versão recente do [Node.js](https://nodejs.org/) instalada. A versão LTS (Long-Term Support) é sempre uma escolha segura.
+
+<Aside type="note">
+Verifique sua versão do Node.js com o comando `node -v` no seu terminal. O Nuxt 3 requer a versão 18.0.0 ou mais recente.
+</Aside>
+
+### Criando a Aplicação
+
+1.  **Abra seu terminal** no diretório onde você guarda seus projetos.
+
+2.  **Execute o comando de inicialização:**
+
+    Este comando usará a Nuxi para baixar o template inicial do Nuxt e configurar um novo projeto para você.
+
+    ```bash
+    npx nuxi@latest init meu-primeiro-app-nuxt
+    ```
+    Substitua `meu-primeiro-app-nuxt` pelo nome que desejar.
+
+    O processo é muito rápido. Ao contrário do `create-vue-app`, ele não faz perguntas. Ele cria um projeto minimalista e otimizado para você começar.
+
+3.  **Navegue para o diretório do projeto:**
+    ```bash
+    cd meu-primeiro-app-nuxt
+    ```
+
+4.  **Instale as dependências:**
+    ```bash
+    npm install
+    ```
+
+5.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    npm run dev
+    ```
+
+O terminal exibirá uma saída informando que o servidor está rodando, geralmente em `http://localhost:3000`.
+
+```
+  > Local:    http://localhost:3000/
+  > Network:  http://192.168.1.100:3000/
+```
+
+Abra seu navegador e acesse o endereço local. Você verá a página de boas-vindas do Nuxt 3!
+
+<Aside type="tip" title="Sucesso!">
+Parabéns! Você tem uma aplicação Nuxt 3 rodando em sua máquina. Note a velocidade com que o servidor inicia — essa é uma das muitas otimizações que o Nuxt oferece.
+</Aside>
+
+### A Estrutura Inicial
+
+Se você abrir a pasta do projeto no seu editor de código, verá uma estrutura bem enxuta:
+
+```text
+.nuxt/            # Diretório de build, gerado pelo Nuxt. Você não mexe aqui.
+node_modules/     # Dependências do projeto.
+.gitignore
+.npmrc
+app.vue           # O componente raiz da sua aplicação.
+nuxt.config.ts    # Arquivo de configuração principal do Nuxt.
+package.json
+README.md
+tsconfig.json
+```
+
+Os dois arquivos mais importantes para nós agora são:
+
+-   **`app.vue`**: Este é o componente principal da sua aplicação. No momento, ele contém o componente `<NuxtWelcome />` que você vê na tela. Você pode substituí-lo pelo seu próprio código. Por enquanto, ele serve como ponto de entrada para toda a sua aplicação Vue.
+-   **`nuxt.config.ts`**: Aqui é onde você configurará sua aplicação Nuxt, adicionará módulos, definirá configurações de CSS, e muito mais.
+
+No próximo tutorial, vamos explorar como expandir essa estrutura mínima com as pastas "mágicas" do Nuxt, como `pages/` e `components/`, para começar a construir uma aplicação de verdade.

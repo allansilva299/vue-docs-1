@@ -1,0 +1,100 @@
+---
+title: Ciclo de Vida do Componente
+description: "Entenda os hooks do ciclo de vida do Vue, como onMounted, onUnmounted e onUpdated, para executar código em momentos chave da existência de um componente."
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Um componente Vue tem uma "vida": ele é criado, inserido na página (montado), atualizado quando seus dados mudam, e finalmente removido (desmontado). O Vue nos permite "enganchar" (`hook`) nesses momentos chave para executar código específico. Esses são os **hooks do ciclo de vida**.
+
+Na Composition API, esses hooks são funções que importamos do `vue` e que começam com o prefixo `on`.
+
+### O Hook Mais Importante: `onMounted`
+
+O hook `onMounted` é disparado **depois** que o componente foi renderizado pela primeira vez e inserido no DOM. É o lugar perfeito para:
+
+-   Realizar manipulações diretas no DOM (ex: integrar uma biblioteca de terceiros que precisa de um elemento HTML).
+-   Fazer chamadas de API iniciais em aplicações puras de Vue (Client-Side Rendering).
+-   Configurar eventos que não são do Vue (ex: `window.addEventListener`).
+
+**Exemplo Prático: Foco em um Input**
+
+Imagine que queremos que um campo de input receba o foco automaticamente assim que a página for carregada.
+
+```vue
+<script setup>
+import { ref, onMounted } from 'vue';
+
+// 1. Crie um 'ref' para o template. O nome deve corresponder ao atributo 'ref' no template.
+const inputRef = ref(null);
+
+// 2. Registre o hook onMounted.
+onMounted(() => {
+  // Neste ponto, o <input> já existe na página.
+  // Podemos acessar o elemento do DOM diretamente através de inputRef.value
+  console.log('Componente montado!');
+  inputRef.value.focus();
+});
+</script>
+
+<template>
+  <h1>Bem-vindo!</h1>
+  <!-- 3. Anexe o 'ref' ao elemento do template. -->
+  <input ref="inputRef" type="text" placeholder="Eu recebo o foco automaticamente">
+</template>
+```
+
+<Aside type="note" title="Refs de Template">
+Usar `ref()` para obter uma referência a um elemento do DOM é um padrão muito comum. Note que o valor do ref (`inputRef.value`) só estará disponível **dentro e após** o hook `onMounted`. Tentar acessá-lo antes disso resultará em `null`.
+</Aside>
+
+### Limpando com `onUnmounted`
+
+O oposto do `onMounted` é o `onUnmounted`. Este hook é executado um pouco antes de o componente ser removido do DOM. Ele é crucial para **limpeza**, evitando vazamentos de memória.
+
+Use `onUnmounted` para:
+-   Remover `event listeners` globais (como os do `window` ou `document`).
+-   Cancelar `setIntervals` ou `setTimeout`.
+-   Desconectar de APIs de Web Sockets.
+
+**Exemplo: Rastreando a Posição do Mouse**
+
+```vue
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue';
+
+const x = ref(0);
+const y = ref(0);
+
+function updateMousePosition(event) {
+  x.value = event.pageX;
+  y.value = event.pageY;
+}
+
+// Quando o componente é montado, adicionamos o listener ao window.
+onMounted(() => {
+  window.addEventListener('mousemove', updateMousePosition);
+});
+
+// CRUCIAL: Quando o componente for destruído, removemos o listener.
+// Se não fizermos isso, o listener continuaria rodando em segundo plano,
+// causando vazamentos de memória e erros.
+onUnmounted(() => {
+  window.removeEventListener('mousemove', updateMousePosition);
+});
+</script>
+
+<template>
+  <p>Posição do mouse: {{ x }}, {{ y }}</p>
+</template>
+```
+
+### Outros Hooks Úteis
+
+Embora `onMounted` e `onUnmounted` sejam os mais comuns, existem outros:
+
+-   `onBeforeMount`: Executado logo antes de o componente ser montado no DOM. O elemento ainda não existe.
+-   `onUpdated`: Executado depois que o componente se atualiza devido a uma mudança em seus dados reativos.
+-   `onBeforeUpdate`: Executado logo antes de o componente se atualizar.
+-   `onErrorCaptured`: Usado para capturar erros de componentes filhos.
+
+Entender o ciclo de vida permite que você controle com precisão quando seu código é executado, levando a aplicações mais robustas e eficientes. O próximo passo é aprender a organizar sua lógica de forma limpa e reutilizável com os Composables.
